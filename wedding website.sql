@@ -1,0 +1,15 @@
+CREATE DATABASE IF NOT EXISTS wedding_guestbook;
+USE wedding_guestbook;
+
+CREATE TABLE IF NOT EXISTS wishes (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  email VARCHAR(255) NOT NULL,
+  category VARCHAR(50) NOT NULL,
+  message TEXT NOT NULL,
+  image VARCHAR(255) DEFAULT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'NewPassword123!';
+FLUSH PRIVILEGES;
