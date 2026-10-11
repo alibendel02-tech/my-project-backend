@@ -28,6 +28,27 @@ const pool = mysql.createPool({
   queueLimit: 0
 });
 
+// Automatically create the wishes table on startup if it doesn't exist
+async function initDB() {
+  try {
+    const createTableQuery = 
+      CREATE TABLE IF NOT EXISTS wishes (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        email VARCHAR(255) NOT NULL,
+        category VARCHAR(100),
+        message TEXT NOT NULL,
+        image_url VARCHAR(500),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    ;
+    await pool.query(createTableQuery);
+    console.log("Database table 'wishes' is ready!");
+  } catch (err) {
+    console.error("Error creating database table:", err);
+  }
+}
+
 // Configure Multer for File Uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, 'uploads/'),
@@ -56,9 +77,9 @@ app.get('/api/wishes', async (req, res) => {
 // POST /api/wishes - Add a new wish with optional photo
 app.post('/api/wishes', upload.single('image'), async (req, res) => {
   const { name, email, category, message } = req.body;
-  const imageUrl = req.file ? `/uploads/${req.file.filename}` : null;
+  const imageUrl = req.file ? /uploads/${req.file.filename} : null;
 
-  if (!name || !email || !message) {
+  if (!name  !email  !message) {
     return res.status(400).json({ error: 'Name, email, and message are required fields.' });
   }
 
@@ -91,8 +112,9 @@ app.get('/*splat', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// Start Server
+// Start Server and Initialize Database
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+app.listen(PORT, async () => {
+  console.log(Server running on port ${PORT});
+  await initDB();
 });
