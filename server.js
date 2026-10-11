@@ -31,7 +31,7 @@ const pool = mysql.createPool({
 // Automatically create the wishes table on startup if it doesn't exist
 async function initDB() {
   try {
-    const createTableQuery = 
+    const createTableQuery = `
       CREATE TABLE IF NOT EXISTS wishes (
         id INT AUTO_INCREMENT PRIMARY KEY,
         name VARCHAR(255) NOT NULL,
@@ -40,8 +40,8 @@ async function initDB() {
         message TEXT NOT NULL,
         image_url VARCHAR(500),
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      );
-    ;
+      )
+    `;
     await pool.query(createTableQuery);
     console.log("Database table 'wishes' is ready!");
   } catch (err) {
@@ -77,16 +77,16 @@ app.get('/api/wishes', async (req, res) => {
 // POST /api/wishes - Add a new wish with optional photo
 app.post('/api/wishes', upload.single('image'), async (req, res) => {
   const { name, email, category, message } = req.body;
-  const imageUrl = req.file ? /uploads/${req.file.filename} : null;
+  const imageUrl = req.file ? `/uploads/${req.file.filename}` : null;
 
-  if (!name  !email  !message) {
+  if (!name || !email || !message) {
     return res.status(400).json({ error: 'Name, email, and message are required fields.' });
   }
 
   try {
     const sql = 'INSERT INTO wishes (name, email, category, message, image_url) VALUES (?, ?, ?, ?, ?)';
     const [result] = await pool.query(sql, [name, email, category, message, imageUrl]);
-    
+
     const [newWish] = await pool.query('SELECT * FROM wishes WHERE id = ?', [result.insertId]);
     res.status(201).json(newWish[0]);
   } catch (err) {
@@ -115,6 +115,6 @@ app.get('/*splat', (req, res) => {
 // Start Server and Initialize Database
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, async () => {
-  console.log(Server running on port ${PORT});
+  console.log(`Server running on port ${PORT}`);
   await initDB();
 });
